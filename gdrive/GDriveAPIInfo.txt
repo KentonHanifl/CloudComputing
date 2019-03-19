@@ -1,0 +1,5 @@
+ClientID:
+907351661275-d7jeo01orn9qc8ef11hdqrqf0epmg944.apps.googleusercontent.com 
+
+ClientSecret:
+78mq6xSr7m2QFb7-It3jBd9j
