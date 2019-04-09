@@ -6,7 +6,8 @@ dat = f.read()
 f.close()
 l = len(dat)
 
-ext = fname[-3:]
+dot = fname.rfind(".")
+ext = fname[dot+1:]
 
 n=int(input("n="))
 
@@ -27,3 +28,5 @@ for i in range(n):
 with open("fullout."+ext,'wb') as outfile:
     outfile.write(re)
     outfile.close()
+
+print(re==dat)
