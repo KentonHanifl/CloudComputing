@@ -1,23 +1,29 @@
-f = open("video.mp4",'rb')
+import math
+
+fname = input("file=")
+f = open(fname,'rb')
 dat = f.read()
 f.close()
 l = len(dat)
-f1 = dat[:l//2]
-f2 = dat[l//2:]
-k = open("out1",'wb')
-k.write(f1)
-k2 = open("out2",'wb')
-k2.write(f2)
 
-k.close()
-k2.close()
+ext = fname[-3:]
 
-o1 = open("out1",'rb')
-o2 = open("out2",'rb')
-datOut = o1.read() + o2.read()
-o1.close()
-o2.close()
+n=int(input("n="))
 
-fullOut = open("test.mp4",'wb')
-fullOut.write(datOut)
-fullOut.close()
+for i in range(n):
+    start = math.ceil((l/n)*i)
+    end = math.ceil((l/n)*(i+1))
+    f = dat[start:end]
+    with open("out"+str(i),'wb') as out:
+        out.write(f)
+        out.close()
+
+re = bytes()
+for i in range(n):
+    with open("out"+str(i),'rb') as infile:
+        re += infile.read()
+        infile.close()
+
+with open("fullout."+ext,'wb') as outfile:
+    outfile.write(re)
+    outfile.close()
