@@ -1,13 +1,11 @@
 #DiAggStorage
 #Distributed Aggregated (Cloud) Storage
 
-#.txt only demo version
-
 import dropbox
 from dropbox import DropboxOAuth2FlowNoRedirect
 import os
-import time #remove when proper download verification is done
 import math
+from diaggdropbox import *
 
 
 setup = input("new accounts? y/n")
@@ -45,9 +43,7 @@ else:
     num_accounts = len(dbx_access_tokens)
 
 print('loaded {0} accounts'.format(num_accounts))
-##
-##dbx1 = dropbox.Dropbox(dbx_access_tokens[0])
-##dbx2 = dropbox.Dropbox(dbx_access_tokens[1])
+
 dbxAccounts = []
 for token in dbx_access_tokens:
     dbxAccounts.append(dropbox.Dropbox(token))
@@ -58,46 +54,16 @@ while 'upload' in action.lower() or 'download' in action.lower() or 'see files' 
 
     if 'upload' in action.lower():
         filename = input('type upload file with extention (only .txt for now)')
-
-        #read original file
-        try:
-            f = open(filename,'rb')
-        except:
-            print('file not found')
-            action = input("\n\nsee files\nupload\ndownload\nquit\n")
-            continue
-
-        #read the file
-        dat = f.read()
-        f.close()
-        l = len(dat)
-
-        #identify the extention for later
-        dot = filename.rfind(".")
-        ext = filename[dot:]
-        filename=filename[:dot]
-        n = num_accounts
-
-        #split the files
-        for i in range(n):
-            start = math.ceil((l/n)*i)
-            end = math.ceil((l/n)*(i+1))
-            f = dat[start:end]
-            
-            dbxAccounts[i].files_upload(f,'/'+filename+str(i)+ext)
-##            os.remove(filename+str(i)+ext)
-##            with open("out"+str(i),'wb') as out:
-##                out.write(f)
-##                out.close()
-                #upload the split file then remove it
-        #remove original file
-        os.remove(filename+ext)
+        uploadfiledbx(dbxAccounts,filename)
 
     elif 'download' in action.lower():
         filename = input('type download file')
+        
+        #get the extention
         dot = filename.rfind(".")
         ext = filename[dot:]
         filename=filename[:dot]
+        
         directory = os.getcwd()
         
         try:
@@ -109,73 +75,41 @@ while 'upload' in action.lower() or 'download' in action.lower() or 'see files' 
             continue
 
         re = bytes()
-        n=num_accounts
-        for i in range(n):
+        
+        #download all of the split files and combine their binary data
+        for i in range(num_accounts):
             with open(filename+str(i)+ext,'rb') as infile:
                 re += infile.read()
                 infile.close()
+                #remove the file when we're done
                 os.remove(filename+str(i)+ext)
 
+        #write the full binary data to the output file
         with open(filename+ext,'wb') as outfile:
             outfile.write(re)
             outfile.close()
-        
-##        o1 = open(filename+'1.txt','rb')
-##        o2 = open(filename+'2.txt','rb')
-##        datOut = o1.read() + o2.read()
-##        o1.close()
-##        o2.close()
-##        
-##        #remove local split files
-##        os.remove(filename+'1.txt')
-##        os.remove(filename+'2.txt')
-##
-##        fullOut = open(filename+'.txt','wb')
-##        fullOut.write(datOut)
-##        fullOut.close()
 
-        #we need to delete the dropbox file too
+        #delete the dropbox files too
         for idx,account in enumerate(dbxAccounts):
             account.files_delete('/'+filename+str(idx)+ext)
-##        dbx1.files_delete('/'+filename+'1.txt')
-##        dbx2.files_delete('/'+filename+'2.txt')
-
         
     elif 'see files' in action.lower():
+
+        fileset = set()
         for account in dbxAccounts:
+            space = account.users_get_space_usage()
+            used = space.used
+            allocated = space.allocation.get_individual().allocated
+            print("used {0:0.2f}% from account {1}".format((used/allocated)*100, account.users_get_current_account().email))
+                  
             for entry in account.files_list_folder('').entries:
-                print(entry.name)
+                entry = entry.name
+                dot = entry.rfind(".")
+                ext = entry[dot:]
+                filename=entry[:dot-1]
+                fileset.add(filename+ext)
+
+        for file in fileset:
+            print(file)
             
     action = input("\n\nsee files\nupload\ndownload\nquit\n")
-
-        
-##      old stuff
-##
-##        f1 = dat[:l//2]
-##        f2 = dat[l//2:]
-##        k = open(filename+'1.txt','wb')
-##        k.write(f1)
-##        k2 = open(filename+'2.txt','wb')
-##        k2.write(f2)
-##
-##        k.close()
-##        k2.close()
-##
-##
-##        #upload the split files
-##
-##        file1 = open(filename+'1.txt','rb').read()
-##        file2 = open(filename+'2.txt','rb').read()
-##
-##        dbx1.files_upload(file1,'/'+filename+'1.txt')
-##
-##        dbx2.files_upload(file2,'/'+filename+'2.txt')
-##
-##        #we need to delete the local files too
-##        os.remove(filename+'1.txt')
-##        os.remove(filename+'2.txt')
-##        os.remove(filename+'.txt')
-
-    
-##                dbx1.files_download_to_file(directory+'/'+filename+'1.txt','/'+filename+'1.txt')
-##                dbx2.files_download_to_file(directory+'/'+filename+'2.txt','/'+filename+'2.txt')
