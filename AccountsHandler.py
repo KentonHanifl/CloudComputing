@@ -22,10 +22,10 @@ class AccountsHandler:
             num_gdriveaccounts = int(rl[1])
             accs.close()
             
-        num_dropboxaccounts += 1
-        account = DropboxAccount(DropboxAccount.getAccount(num_dropboxaccounts-1))
-        self.accounts.append(account)
         
+        account = DropboxAccount(DropboxAccount.getAccount(num_dropboxaccounts))
+        self.accounts.append(account)
+        num_dropboxaccounts += 1
         with open("userAccounts.txt",'w') as accs:
             accs.write(str(num_dropboxaccounts)+'\n')
             accs.write(str(num_gdriveaccounts)+'\n')
@@ -38,11 +38,12 @@ class AccountsHandler:
             num_gdriveaccounts = int(rl[1])
             accs.close()
             
-        num_gdriveaccounts += 1
+        
         temp = GDriveAccount.getAccount(num_gdriveaccounts)
         acc = temp[0]
         token = temp[1]
         folderid = temp[2]
+        num_gdriveaccounts += 1
         
         account = GDriveAccount(acc,token,folderid)
         self.accounts.append(account)
