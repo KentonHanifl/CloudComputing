@@ -2,7 +2,7 @@ import dropbox
 from dropbox import DropboxOAuth2FlowNoRedirect
 import os
 import math
-from diaggdropbox import *
+import webbrowser
 
 class DropboxAccount:
 
@@ -18,6 +18,8 @@ class DropboxAccount:
     def upload(self,filename):
         with open(filename,'rb') as fb:
             f = fb.read()
+            lastSlash = filename.rfind('/')
+            filename = filename[lastSlash+1:]
             self.account.files_upload(f,'/'+filename)
             fb.close()
         os.remove(filename)
@@ -50,13 +52,14 @@ class DropboxAccount:
             app_secret = open('dropbox/app_secret.txt').read()
             flow = DropboxOAuth2FlowNoRedirect(app_key, app_secret)
             url = flow.start()
-            print("visit the following url: {0}".format(url))
-            code = input('put the code here: ').strip()
-            res = flow.finish(code)
-            token = res.access_token
-            print("\nmake sure to sign out of the account you were just signed into\n\n")
-
-            account = open('dropbox/token'+num+'.txt','w')        
-            account.write(token)
-            account.close()
-            return dropbox.Dropbox(token)     
+            webbrowser.open(url)
+            return flow
+##            code = input('put the code here: ').strip()
+##            res = flow.finish(code)
+##            token = res.access_token
+##            print("\nmake sure to sign out of the account you were just signed into\n\n")
+##
+##            account = open('dropbox/token'+num+'.txt','w')        
+##            account.write(token)
+##            account.close()
+##            return dropbox.Dropbox(token)     

@@ -1,5 +1,6 @@
 import os
 import math
+import tkinter.filedialog
 
 def splitter(filename,num_accounts):
     try:
@@ -12,6 +13,8 @@ def splitter(filename,num_accounts):
         return -1
     
     #identify the extention for later
+    originalfilename = filename
+    
     dot = filename.rfind(".")
     ext = filename[dot:]
     filename=filename[:dot]
@@ -19,6 +22,8 @@ def splitter(filename,num_accounts):
     #split the files
     splitfileslist = []
     
+    lastSlash = filename.rfind('/')
+    filename = filename[lastSlash+1:]
     for i in range(num_accounts):
         start = math.ceil((l/num_accounts)*i)
         end = math.ceil((l/num_accounts)*(i+1))
@@ -31,7 +36,7 @@ def splitter(filename,num_accounts):
             
             
     #remove original file
-    os.remove(filename+ext)
+    os.remove(originalfilename)
 
     return splitfileslist
 
@@ -57,6 +62,11 @@ def joiner(filename):
             os.remove(filename+str(i)+ext)
 
     #write the full binary data to the output file
-    with open(filename+ext,'wb') as outfile:
-        outfile.write(re)
-        outfile.close()
+    file = tkinter.filedialog.asksaveasfile(mode='wb',initialdir="/",initialfile=filename+ext,defaultextension=ext)   
+    if file:
+        file.write(re)
+        file.close()
+
+##    with open(filename+ext,'wb') as outfile:
+##        outfile.write(re)
+##        outfile.close()

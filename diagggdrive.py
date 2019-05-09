@@ -42,6 +42,8 @@ class GDriveAccount:
     def upload(self,filename):
 
         f = open(filename,"rb")
+        lastSlash = filename.rfind('/')
+        filename = filename[lastSlash+1:]
         headers = {"Authorization": "Bearer {0}".format(self.token)}
         para = {
             "name": filename,
@@ -61,12 +63,15 @@ class GDriveAccount:
         
         os.remove(filename)
 
-##    def delete(self,filename):
+##    def delete(self,filename): #this is just called in download()
 ##        pass
 
     def seeFiles(self,ids=False):
-        results = self.account.files().list(
-            pageSize=100, fields="nextPageToken, files(id, name)").execute()
+        query = "'"+self.folderid+"' in parents"
+
+        results = self.account.files().list(q=query,
+                                        spaces='drive',
+                                        fields='files(id, name, parents)').execute()
         items=results.get('files', [])
         if ids:
             return items
@@ -75,6 +80,18 @@ class GDriveAccount:
         
         
         return items
+####        old
+##        results = self.account.files().list(
+##            pageSize=100, fields="nextPageToken, files(id, name)").execute()
+##        items=results.get('files', [])
+##        if ids:
+##            return items
+##        
+##        items = [item['name'] for item in items]
+##        
+##        
+##        return items
+##
     
 
     @staticmethod
@@ -99,7 +116,12 @@ class GDriveAccount:
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     'gdrive/credentials.json', SCOPES)
-                creds = flow.run_console()
+                #creds = flow.run_console()
+                creds = flow.run_local_server(host='localhost',
+                                              port=8080,
+                                              authorization_prompt_message='',
+                                              success_message='The auth flow is complete; you may close this window.',
+                                              open_browser=True)
                 account = build('drive','v3',credentials=creds)
                 file_metadata = {
                     'name': 'DiAgg',

@@ -21,15 +21,16 @@ class AccountsHandler:
             num_dropboxaccounts = int(rl[0])
             num_gdriveaccounts = int(rl[1])
             accs.close()
-            
+
+        return DropboxAccount.getAccount(num_dropboxaccounts)
         
-        account = DropboxAccount(DropboxAccount.getAccount(num_dropboxaccounts))
-        self.accounts.append(account)
-        num_dropboxaccounts += 1
-        with open("userAccounts.txt",'w') as accs:
-            accs.write(str(num_dropboxaccounts)+'\n')
-            accs.write(str(num_gdriveaccounts)+'\n')
-            accs.close()
+##        account = DropboxAccount(DropboxAccount.getAccount(num_dropboxaccounts))
+##        self.accounts.append(account)
+##        num_dropboxaccounts += 1
+##        with open("userAccounts.txt",'w') as accs:
+##            accs.write(str(num_dropboxaccounts)+'\n')
+##            accs.write(str(num_gdriveaccounts)+'\n')
+##            accs.close()
 
     def newGDrive(self):
         with open("userAccounts.txt",'r') as accs:
@@ -119,8 +120,9 @@ class AccountsHandler:
                         pass
                         #fileset.add("NOT SPLIT "+file)
 
-        for element in fileset:
-            print(element)
+##        for element in fileset:
+##            print(element)
+        return fileset
 
 
 
@@ -134,6 +136,5 @@ class AccountsHandler:
 ##
 
 
-handler = AccountsHandler()
-
-handler.loadAccounts()
+##handler = AccountsHandler()
+##handler.loadAccounts()
